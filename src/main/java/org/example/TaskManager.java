@@ -2,6 +2,7 @@ package org.example;
 
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,12 +12,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-public class Main {
+public class TaskManager {
 
+    static final String FILE_NAME = "tasks.csv";
     static String[][] tasks;
-    static final String[] OPTIONS = {"add", "remove", "list", "quit"};
+    static final String[] OPTIONS = {"[a]dd", "[d]elete", "[l]ist", "[q]uit"};
 
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
 
         String description = null;
         String dueDate = null;
@@ -24,15 +27,39 @@ public class Main {
         String delete = null;
 
 
-        //listOptions(OPTIONS);
-        tasks = loadFromFileToTable("tasks.csv");
-        printTab(tasks);
-        deleteTask(delete);
-        //addTask(description, dueDate, priority);
-        saveToFile("tasks.csv", tasks);
+        loadFromFileToTable("tasks.csv");
+
+        listOptions(OPTIONS);
+
+        while (scanner.hasNextLine()) {
+            String input = scanner.nextLine();
+
+            switch (input) {
+                case "quit":
+                case "q":
+                    quitApp();
+                    break;
+                case "add":
+                case "a":
+                    addTask(description, dueDate, priority);
+                    break;
+                case "delete":
+                case "d":
+                    deleteTask(delete);
+                    break;
+                case "list":
+                case "l":
+
+                    printTab(tasks);
+                    break;
+                default:
+                    System.out.println("Please select a correct option.");
+            }
+
+            listOptions(OPTIONS);
+        }
 
     }
-
 
 
     public static String[][] loadFromFileToTable(String filename) {
@@ -41,8 +68,7 @@ public class Main {
         if (!Files.exists(taskFile)) {
             System.out.println("Given file does not exist!");
         }
-
-        String[][] taskTable = null;
+        tasks = null;
 
         try {
 
@@ -51,13 +77,12 @@ public class Main {
 
             // [][] = [poziom][pion]
             // [][] =[pojedynczy element między przecinkami - kolumna][każdy z elementów między przecinkami po kolei - split by coma]
-
-            taskTable = new String[taskStrings.size()][taskStrings.get(0).split(",").length];
+            tasks = new String[taskStrings.size()][taskStrings.get(0).split(",").length];
 
             for (i = 0; i < taskStrings.size(); i++) {
                 String[] split = taskStrings.get(i).split(",");
                 for (int j = 0; j < split.length; j++) {
-                    taskTable[i][j] = split[j];
+                    tasks[i][j] = split[j];
 
                 }
 
@@ -67,10 +92,13 @@ public class Main {
         }
 
 
-        return taskTable;
+        return tasks;
     }
 
     public static void printTab(String[][] taskTab) {
+
+        System.out.println("Task list:" + "\n");
+
         for (int i = 0; i < taskTab.length; i++) {
             System.out.print(i + " : ");
             for (int j = 0; j < taskTab[i].length; j++) {
@@ -115,21 +143,43 @@ public class Main {
     public static void deleteTask(String delete) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Please provide number of task to delete.");
-       delete = scanner.nextLine();
-        int index = Integer.parseInt(delete);
+        delete = scanner.nextLine();
 
-        try {
-            if (index < tasks.length) {
-                tasks = ArrayUtils.remove(tasks, index);
+
+        int index = 0;
+
+        if (NumberUtils.isParsable(delete)) {
+            index = Integer.parseInt(delete);
+
+        } else {
+            System.out.println("Please provide a number");
+           delete = scanner.nextLine();
+        }
+        if (index < 0) {
+            System.out.println("Please provide a number greater or equal 0");
+            scanner.nextLine();
+
+        }
+
+        if (index >= 0) {
+
+            try {
+                if (index < tasks.length) {
+                    tasks = ArrayUtils.remove(tasks, index);
+                    System.out.println("Task deleted successfully");
+                }
+
+
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                System.out.println("Task with the number provided does not exist");
             }
-        } catch (ArrayIndexOutOfBoundsException ex) {
-            System.out.println("Element not exist in tab");
+
         }
 
     }
 
     public static void listOptions(String[] options) {
-        System.out.println("Please select an option: ");
+        System.out.println("\n"+"Please select an option: ");
 
         for (String option : options) {
             System.out.println(option);
@@ -137,8 +187,11 @@ public class Main {
 
     }
 
-    public static void quitApp(String[] args) {
+    public static void quitApp() {
 
+        saveToFile(FILE_NAME, tasks);
+        System.out.println("Thank you for using the application! Good bye!");
+        System.exit(0);
 
     }
 

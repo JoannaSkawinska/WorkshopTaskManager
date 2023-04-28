@@ -24,7 +24,7 @@ public class TaskManager {
         String description = null;
         String dueDate = null;
         String priority = null;
-        String delete = null;
+        // String delete = null;
 
 
         loadFromFileToTable("tasks.csv");
@@ -45,11 +45,10 @@ public class TaskManager {
                     break;
                 case "delete":
                 case "d":
-                    deleteTask(delete);
+                    deleteTask(tasks, validateInputForRemoval());
                     break;
                 case "list":
                 case "l":
-
                     printTab(tasks);
                     break;
                 default:
@@ -140,46 +139,46 @@ public class TaskManager {
 
     }
 
-    public static void deleteTask(String delete) {
+    public static int validateInputForRemoval() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Please provide number of task to delete.");
-        delete = scanner.nextLine();
-
+        String delete = scanner.nextLine();
 
         int index = 0;
 
         if (NumberUtils.isParsable(delete)) {
             index = Integer.parseInt(delete);
-
         } else {
             System.out.println("Please provide a number");
-           delete = scanner.nextLine();
-        }
-        if (index < 0) {
-            System.out.println("Please provide a number greater or equal 0");
-            scanner.nextLine();
-
+            return validateInputForRemoval();
         }
 
-        if (index >= 0) {
+        while (index < 0 || index >= tasks.length) {
+            System.out.println("Incorrect argument passed. Please provide a number between 0 and " + (tasks.length - 1));
+            index = validateInputForRemoval();
+        }
 
-            try {
-                if (index < tasks.length) {
-                    tasks = ArrayUtils.remove(tasks, index);
-                    System.out.println("Task deleted successfully");
-                }
+        return index;
+    }
 
+    public static void deleteTask(String[][] tab, int index) {
 
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                System.out.println("Task with the number provided does not exist");
+        try {
+            if (index < tab.length) {
+                tasks = ArrayUtils.remove(tab, index);
+                System.out.println("Task deleted successfully");
             }
 
+
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            System.out.println("Task with the number provided does not exist");
         }
 
     }
 
+
     public static void listOptions(String[] options) {
-        System.out.println("\n"+"Please select an option: ");
+        System.out.println("\n" + "Please select an option: ");
 
         for (String option : options) {
             System.out.println(option);
@@ -194,5 +193,5 @@ public class TaskManager {
         System.exit(0);
 
     }
-
 }
+

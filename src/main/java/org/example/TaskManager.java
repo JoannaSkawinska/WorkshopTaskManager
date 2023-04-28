@@ -45,6 +45,7 @@ public class TaskManager {
                     break;
                 case "delete":
                 case "d":
+                    System.out.println("Please provide number of task to delete.");
                     deleteTask(tasks, validateInputForRemoval());
                     break;
                 case "list":
@@ -141,7 +142,6 @@ public class TaskManager {
 
     public static int validateInputForRemoval() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Please provide number of task to delete.");
         String delete = scanner.nextLine();
 
         int index = 0;
@@ -149,12 +149,12 @@ public class TaskManager {
         if (NumberUtils.isParsable(delete)) {
             index = Integer.parseInt(delete);
         } else {
-            System.out.println("Please provide a number");
+            System.out.println(ConsoleColors.YELLOW + "Incorrect argument passed. Please provide numerical value");
             return validateInputForRemoval();
         }
 
         while (index < 0 || index >= tasks.length) {
-            System.out.println("Incorrect argument passed. Please provide a number between 0 and " + (tasks.length - 1));
+            System.out.println(ConsoleColors.YELLOW + "Incorrect argument passed. Please provide a number between 0 and " + (tasks.length - 1));
             index = validateInputForRemoval();
         }
 
@@ -166,7 +166,7 @@ public class TaskManager {
         try {
             if (index < tab.length) {
                 tasks = ArrayUtils.remove(tab, index);
-                System.out.println("Task deleted successfully");
+                System.out.println(ConsoleColors.GREEN_BRIGHT + "Task deleted successfully");
             }
 
 
@@ -178,7 +178,8 @@ public class TaskManager {
 
 
     public static void listOptions(String[] options) {
-        System.out.println("\n" + "Please select an option: ");
+        System.out.println(ConsoleColors.BLUE);
+        System.out.println("\n" + "Please select an option: " + ConsoleColors.RESET);
 
         for (String option : options) {
             System.out.println(option);
@@ -189,7 +190,7 @@ public class TaskManager {
     public static void quitApp() {
 
         saveToFile(FILE_NAME, tasks);
-        System.out.println("Thank you for using the application! Good bye!");
+        System.out.println(ConsoleColors.RED + "Thank you for using the application! Good bye!");
         System.exit(0);
 
     }
